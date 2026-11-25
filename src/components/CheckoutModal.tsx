@@ -27,8 +27,15 @@ export default function CheckoutModal({ account, game, resume, onCreated, onFini
 
   const create = () => {
     if (!account) return;
-    setError(null);
-    createCheckout(account.id, game)
+    const acc = account as Record<string, unknown>;
+    const accountId = acc.item_id ?? acc.itemId ?? acc.id;
+
+    if (!accountId) {
+      setError('ID do item não encontrado.');
+      return;
+    }
+   setError(null);
+    createCheckout(String(accountId), game)
       .then((c) => {
         if (c.chargedAmount !== null && c.displayPrice !== null && Math.abs(c.chargedAmount - c.displayPrice) > 0.01) {
           console.warn('Valor do PIX diferente do preço exibido:', c.chargedAmount, c.displayPrice);
