@@ -43,7 +43,14 @@ export default function AccountModal({ account, game, onClose, onBuy }: Props) {
   useEffect(() => {
     const ctrl = new AbortController();
     setLoading(true);
-    fetchAccountDetails(account.id, game, ctrl.signal)
+    const acc = account as Record<string, unknown>;
+const accountId = acc.item_id ?? acc.itemId ?? acc.id;
+
+if (!accountId) {
+  setLoading(false);
+  return;
+}
+   fetchAccountDetails(String(accountId), game, ctrl.signal)
       .then((res) => {
         setDetail({ ...account, ...res.account });
         setSkins(res.skins ?? []);
