@@ -53,6 +53,11 @@ export interface CheckoutResponse {
   game: GameSlug;
   displayPrice: number | null;
   chargedAmount: number | null;
+  /**
+   * Valor final com margem, resolvido no front ao criar o pedido
+   * (displayPrice → preço do catálogo → chargedAmount). Salvo junto do pedido.
+   */
+  finalPrice?: number | null;
   qrCodeImage: string | null;
   copyPaste: string | null;
   expiresAt: string | null;

@@ -1,4 +1,41 @@
-import type { Account } from '../types';
+import type { Account, CheckoutResponse } from '../types';
+
+/** Preço válido = número finito e maior que zero. */
+export function isValidPrice(value: unknown): value is number {
+  return typeof value === 'number' && Number.isFinite(value) && value > 0;
+}
+
+/** Converte números vindos como string ("129.90") sem aceitar lixo. */
+function toPrice(value: unknown): number | null {
+  if (isValidPrice(value)) return value;
+  if (typeof value === 'string' && value.trim()) {
+    const n = Number(value);
+    if (isValidPrice(n)) return n;
+  }
+  return null;
+}
+
+/** Retorna o primeiro preço válido da lista, ou null. */
+export function pickPrice(...candidates: unknown[]): number | null {
+  for (const c of candidates) {
+    const n = toPrice(c);
+    if (n !== null) return n;
+  }
+  return null;
+}
+
+/**
+ * Valor final (com margem) de um pedido PIX.
+ * Ordem: `displayPrice` do create-checkout → valor final já salvo no pedido →
+ * preço do catálogo (já com margem) → `chargedAmount` apenas como último recurso.
+ */
+export function checkoutPrice(
+  checkout: Pick<CheckoutResponse, 'displayPrice' | 'chargedAmount' | 'finalPrice'> | null | undefined,
+  catalogPrice?: unknown,
+): number | null {
+  if (!checkout) return pickPrice(catalogPrice);
+  return pickPrice(checkout.displayPrice, checkout.finalPrice, catalogPrice, checkout.chargedAmount);
+}
 
 export function formatBRL(value: number | null | undefined): string {
   if (typeof value !== 'number' || !Number.isFinite(value)) return 'Consultar';
