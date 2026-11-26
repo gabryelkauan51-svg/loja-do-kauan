@@ -1,5 +1,5 @@
 import { gameEmoji } from '../lib/games';
-import { formatBRL, getAccountMeta } from '../lib/format';
+import { formatBRL, getAccountMeta, pickPrice } from '../lib/format';
 import type { Account, GameSlug } from '../types';
 
 interface Props {
@@ -37,7 +37,7 @@ export default function AccountCard({ account, game, onOpen }: Props) {
         )}
 
         <div className="mt-auto flex items-center justify-between gap-3 pt-2">
-          <p className="text-xl font-extrabold text-white">{formatBRL(account.price)}</p>
+          <p className="text-xl font-extrabold text-white">{formatBRL(pickPrice(account.price))}</p>
           <button
             type="button"
             onClick={() => onOpen(account)}

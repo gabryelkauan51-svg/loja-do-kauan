@@ -4,7 +4,7 @@ import Modal from './Modal';
 import Spinner from './Spinner';
 import DeliveryScreen from './DeliveryScreen';
 import { createCheckout } from '../lib/api';
-import { copyText, formatBRL, qrImageSrc } from '../lib/format';
+import { checkoutPrice, copyText, formatBRL, qrImageSrc } from '../lib/format';
 import { useOrderPolling } from '../hooks/useOrderPolling';
 import type { Account, CheckoutResponse, GameSlug } from '../types';
 
@@ -37,11 +37,10 @@ export default function CheckoutModal({ account, game, resume, onCreated, onFini
    setError(null);
     createCheckout(String(accountId), game)
       .then((c) => {
-        if (c.chargedAmount !== null && c.displayPrice !== null && Math.abs(c.chargedAmount - c.displayPrice) > 0.01) {
-          console.warn('Valor do PIX diferente do preço exibido:', c.chargedAmount, c.displayPrice);
-        }
-        setCheckout(c);
-        onCreated(c);
+        // Valor final com margem: displayPrice do backend; chargedAmount só como fallback.
+        const order: CheckoutResponse = { ...c, finalPrice: checkoutPrice(c, account.price) };
+        setCheckout(order);
+        onCreated(order);
       })
       .catch((e: Error) => setError(e.message));
   };
@@ -76,7 +75,7 @@ export default function CheckoutModal({ account, game, resume, onCreated, onFini
 
   const qrSrc = qrImageSrc(checkout?.qrCodeImage ?? null);
   const payload = checkout?.copyPaste ?? (qrSrc ? null : checkout?.qrCodeImage ?? null);
-  const amount = checkout?.chargedAmount ?? checkout?.displayPrice ?? null;
+  const amount = checkoutPrice(checkout, account?.price);
 
   return (
     <Modal onClose={onClose} label="Pagamento via PIX">

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import Modal from './Modal';
 import Spinner from './Spinner';
 import { fetchAccountDetails } from '../lib/api';
-import { formatBRL, getAccountMeta, humanize } from '../lib/format';
+import { formatBRL, getAccountMeta, humanize, pickPrice } from '../lib/format';
 import type { Account, GameSlug, Skin } from '../types';
 
 interface Props {
@@ -52,7 +52,8 @@ if (!accountId) {
 }
    fetchAccountDetails(String(accountId), game, ctrl.signal)
       .then((res) => {
-        setDetail({ ...account, ...res.account });
+        // Mantém o preço final do catálogo (com margem); o dos detalhes é só fallback.
+        setDetail({ ...account, ...res.account, price: pickPrice(account.price, res.account?.price) });
         setSkins(res.skins ?? []);
         setError(null);
       })
@@ -167,7 +168,7 @@ if (!accountId) {
         </section>
 
         <footer className="flex flex-col gap-3 border-t border-line pt-5 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-2xl font-extrabold">{formatBRL(detail.price)}</p>
+          <p className="text-2xl font-extrabold">{formatBRL(pickPrice(detail.price))}</p>
           <button
             type="button"
             onClick={() => onBuy(detail)}

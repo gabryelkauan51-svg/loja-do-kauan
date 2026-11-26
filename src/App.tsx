@@ -7,6 +7,7 @@ import AccountModal from './components/AccountModal';
 import CheckoutModal from './components/CheckoutModal';
 import { useCatalog } from './hooks/useCatalog';
 import { GAMES } from './lib/games';
+import { checkoutPrice, formatBRL } from './lib/format';
 import type { Account, CheckoutResponse, GameSlug } from './types';
 
 const PER_PAGE = 24;
@@ -143,7 +144,16 @@ export default function App() {
       {pending && !checkoutOpen && (
         <div className="fixed inset-x-0 bottom-0 z-40 border-t border-brand/40 bg-card/95 backdrop-blur">
           <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-3 px-4 py-3 sm:flex-row sm:items-center">
-            <p className="text-sm text-zinc-200">Você tem um pedido PIX em andamento.</p>
+            <p className="text-sm text-zinc-200">
+              Você tem um pedido PIX em andamento
+              {checkoutPrice(pending) !== null && (
+                <>
+                  {' '}
+                  de <strong className="font-extrabold text-white">{formatBRL(checkoutPrice(pending))}</strong>
+                </>
+              )}
+              .
+            </p>
             <div className="flex gap-2">
               <button
                 type="button"
